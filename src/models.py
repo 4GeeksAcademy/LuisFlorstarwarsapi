@@ -11,38 +11,44 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/test.db"
 app.config["SQLALCHEMY_ECHO"] = True
 db = SQLAlchemy(app)
 
-class Follower(db.Model):
-    __tablename__ = 'follower'
-    user_from_id = db.Column(db.Integer, ForeignKey('user.id'), primary_key=True, nullable=False)
-    user_to_id = db.Column(db.Integer, ForeignKey('user.id'), primary_key=True, nullable=False)
-
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False, index=True)
-    username = db.Column(db.String(250), nullable=False, index=True)
 
-class Comment(db.Model):
-    __tablename__ = 'comment'
+class Species(db.Model):
+    __tablename__ = 'species'
+    uid = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
+    description = db.Column(db.String(500), nullable=False)
+    name = db.Column(db.String(500), nullable=False)
+    classification = db.Column(db.String(500), nullable=False)
+    planet_uid = db.Column(db.Integer, ForeignKey('planets.uid'), nullable=False)
+
+class Planets(db.Model):
+    __tablename__ = 'planets'
+    uid = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
+    name = db.Column(db.String(500), nullable=False)
+    gravity = db.Column(db.String(500), nullable=False)
+
+    
+class People(db.Model):
+    __tablename__ = 'people'
     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
-    comment_text = db.Column(db.String(500), nullable=True)
-    author_id = db.Column(db.Integer, ForeignKey('user.id'), nullable=False)
-    post_id = db.Column(db.Integer, ForeignKey('post.id'), nullable=False)
+    description = db.Column(db.String(500), nullable=False)
+    name = db.Column(db.String(500), nullable=False)
+    planet_uid = db.Column(db.Integer, ForeignKey('planets.uid'), nullable=False)
 
-class Post(db.Model):
-    __tablename__ = 'post'
-    id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
-    user_id = db.Column(db.Integer, ForeignKey('user.id'), nullable=False)
+class FavType(enum.Enum):
+    Planets = "Planets"
+    Species = "Species"
+    People = "People"
 
-class MediaType(enum.Enum):
-    Photo = "Photo"
-    Video = "Video"
-
-class Media(db.Model):
-    __tablename__ = 'media'
+class Favourites(db.Model):
+    __tablename__ = 'favourites'
     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False, index=True)
-    type = db.Column(db.Enum (MediaType), nullable=False, index=True)
-    url = db.Column(db.String(300), nullable=False)
-    post_id = db.Column(db.Integer, ForeignKey('post.id'), nullable=False)
+    user_from_id = db.Column(db.Integer, ForeignKey('user.id'), primary_key=True, nullable=False)
+    external_id = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(500), nullable=False)
+    type = db.Column(db.Enum (FavType), nullable=False, index=True)
 
 
     def to_dict(self):
